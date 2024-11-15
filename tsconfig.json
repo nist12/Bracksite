@@ -1,4 +1,14 @@
 {
   // https://nuxt.com/docs/guide/concepts/typescript
-  "extends": "./.nuxt/tsconfig.json"
+  "extends": "./.nuxt/tsconfig.json",
+    "compilerOptions": {
+      "moduleResolution": "node",
+      "types": ["node", "@types/validator"],
+      "baseUrl": ".",
+      "skipLibCheck": true,     // Ignoriert Typenprüfungen für node_modules, um Typfehler zu vermeiden
+      "esModuleInterop": true, // Ermöglicht es TypeScript, CommonJS-Module zu importieren
+      "paths": {
+        "@/*": ["./*"]
+      }
+    }
 }
