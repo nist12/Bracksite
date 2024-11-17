@@ -1,14 +1,16 @@
 <template>
   <div>
     <!-- Schwarzer Hintergrundbereich -->
-    <div class="relative min-h-[100vh] bg-black">
+    <div
+      class="relative"
+      :style="{ minHeight: `${viewportHeight.value * 3}px`, backgroundColor: 'black' }"
+    >
       <!-- Zentrales Bild -->
       <div
-        v-show="opacity > 0"
+        ref="imageElement"
         class="absolute transform"
         :style="{ 
-          transform: `translateY(${translateY}px) scale(${scale})`,
-          opacity: opacity,
+          opacity: opacity.value,
         }"
       >
         <NuxtImg src="/images/GrafikPC_blau.png" alt="Zentrales Bild" />
@@ -16,39 +18,54 @@
     </div>
 
     <!-- Weißer Hintergrundbereich -->
-    <div class="min-h-[200vh] bg-black"></div>
+    <div class="min-h-[300vh] bg-black"></div>
 
     <!-- Nächster Inhalt -->
     <div class="relative min-h-[100vh] bg-white">
+      <ServusCard />
       <h1 class="text-center text-3xl font-bold">Nächster Inhalt</h1>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useScroll } from '@vueuse/core';
 import { ref, computed, onMounted } from 'vue';
+import { useScroll } from '@vueuse/core';
+
+// Helper-Funktion für Ease-In-Out-Kurve
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
 // Scroll-Position erfassen
 const { y } = useScroll(window);
 
+// Refs für die Berechnung der Animation
 const viewportHeight = ref(0); // Höhe des Viewports
 const imageHeight = ref(0); // Höhe des Bildes
 const imageTopOffset = ref(0); // Position des Bildes relativ zum Dokument
+const opacity = ref(1); // Transparenz des Bildes
 
-const maxZoom = 10; // Maximales Zoom-Limit
+// Animationseinstellungen
+const maxZoom = 5; // Maximales Zoom-Limit
 const initialScale = 0.5; // Ausgangsgröße des Bildes
 
-// Viewport-Höhe und Bildinformationen abrufen, sobald die Komponente gemountet ist
+// Bild-Element referenzieren
+const imageElement = ref(null);
+
+// Viewport-Höhe und Bildinformationen erfassen
 onMounted(() => {
   viewportHeight.value = window.innerHeight;
 
-  const imageElement = document.querySelector(".absolute img");
-  if (imageElement) {
-    const rect = imageElement.getBoundingClientRect();
+  const img = imageElement.value?.querySelector("img");
+  if (img) {
+    const rect = img.getBoundingClientRect();
     imageHeight.value = rect.height;
     imageTopOffset.value = rect.top + window.scrollY;
   }
+
+  // Animation starten
+  requestAnimationFrame(updateAnimation);
 });
 
 // Offsets für den Animationsbereich berechnen
@@ -57,32 +74,37 @@ const startAnimationOffset = computed(() => {
 });
 
 const endAnimationOffset = computed(() => {
-  return startAnimationOffset.value + viewportHeight.value * 2; // Animation endet nach 2 Viewport-Höhen
+  return startAnimationOffset.value + viewportHeight.value * 4;
 });
 
-// Transformationen und Effekte basierend auf Scroll-Position berechnen
-const translateY = computed(() => {
+// Animation aktualisieren
+function updateAnimation() {
   const offsetY = y.value - startAnimationOffset.value;
-  return offsetY > 0 ? offsetY : 0;
-});
 
-const scale = computed(() => {
-  const offsetY = y.value - startAnimationOffset.value;
-  const computedScale = offsetY > 0 ? initialScale + offsetY / 300 : initialScale;
-  return Math.min(computedScale, maxZoom);
-});
+  // Skalierung berechnen
+  const progress = Math.min(Math.max(offsetY / (viewportHeight.value * 4), 0), 1);
+  const easedProgress = easeInOutCubic(progress);
+  const scale = initialScale + easedProgress * (maxZoom - initialScale);
 
-const opacity = computed(() => {
-  const offsetY = y.value - startAnimationOffset.value;
-  if (offsetY <= 0) return 1; // Voll sichtbar vor der Animation
-  if (offsetY >= viewportHeight.value) return 0; // Unsichtbar nach dem Scrollen
-  return 1 ; //Ausblenden
-});
+  // Transparenz berechnen
+  opacity.value = 1 - progress;
+
+  // Transform anwenden
+  if (imageElement.value) {
+    const img = imageElement.value.querySelector("img");
+    if (img) {
+      img.style.transform = `scale(${scale})`;
+    }
+  }
+
+  // Nächsten Frame anfordern
+  requestAnimationFrame(updateAnimation);
+}
 </script>
 
 <style scoped>
 /* Übergänge für das Bild */
 .absolute img {
-  transition: transform 0.1s ease, opacity 0.1s ease;
+  transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.5, 1), opacity 0.2s ease;
 }
 </style>
