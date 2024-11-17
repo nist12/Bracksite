@@ -1,6 +1,6 @@
 <template>
   <!--Namen für Layouts immer in so vergeben dies-ist-ein-dateiname-->
-    <div class="bg-gray-900 min-h-screen text-white">
+    <div class="bg-white min-h-screen text-black mt-8 lg:mt-0">
       <!-- Navbar -->
       <!--<Navbar />-->
   
@@ -20,6 +20,9 @@
   </script>
   
   <style scoped>
-  /* Hier kannst du das Layout stylen, z.B. Padding, Margins, etc. */
+  
+    main {
+    overflow-x: hidden; /* Kein horizontaler Überlauf im gesamten Hauptcontainer */
+    }
   </style>
   
