@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-[100vh] bg-black relative">
+  <div class="min-h-[100vh] bg-black relative tracking-wider">
     <div 
-      class="absolute inset-0 flex flex-col items-start justify-center text-bluebr font-bold px-12 sm:px-16 md:px-28 lg:px-32"
+      class="absolute inset-0 flex flex-col items-start justify-center text-bluebr font-bold px-12 sm:px-16 md:px-28 lg:px-32 gap-1 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5"
       v-motion-slide-left
     >
       <span 
