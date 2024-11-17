@@ -1,6 +1,6 @@
 <template>
   <!--Namen für Layouts immer in so vergeben dies-ist-ein-dateiname-->
-    <div class="bg-white min-h-screen text-black mt-8 lg:mt-0">
+    <div class="bg-white text-black lg:mt-0">
       <!-- Navbar -->
       <!--<Navbar />-->
   

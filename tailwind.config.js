@@ -11,6 +11,7 @@ module.exports = {
       colors: {
         greenbr: '#0e6a51',
         greengraybr: '#eaf1ee',
+        bluebr: '#008bff'
       },
     },
   },

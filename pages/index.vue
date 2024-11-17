@@ -2,12 +2,14 @@
     <div>
       <NuxtPage />
 
+      <StartSpuch />
+
       <StartScreen />
 
       <HeroSection />
 
       <AboutUs />
-      
+
       <!--<ContactSection />-->
     </div>
   </template>
