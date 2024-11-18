@@ -1,16 +1,14 @@
 <template>
   <div>
     <!-- Schwarzer Hintergrundbereich -->
-    <div
-      class="relative"
-      :style="{ minHeight: `${viewportHeight.value * 3}px`, backgroundColor: 'black' }"
-    >
+    <div class="relative" :style="{ minHeight: `${viewportHeight.value * 3}px`, backgroundColor: 'black' }">
       <!-- Zentrales Bild -->
       <div
-        ref="imageElement"
+        v-show="opacity > 0"
         class="absolute transform"
         :style="{ 
-          opacity: opacity.value,
+          transform: `translateY(${translateY}px) scale(${scale})`,
+          opacity: opacity,
         }"
       >
         <NuxtImg src="/images/GrafikPC_blau.png" alt="Zentrales Bild" />
@@ -29,43 +27,29 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
 import { useScroll } from '@vueuse/core';
-
-// Helper-Funktion für Ease-In-Out-Kurve
-function easeInOutCubic(t) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
+import { ref, computed, onMounted } from 'vue';
 
 // Scroll-Position erfassen
 const { y } = useScroll(window);
 
-// Refs für die Berechnung der Animation
 const viewportHeight = ref(0); // Höhe des Viewports
 const imageHeight = ref(0); // Höhe des Bildes
 const imageTopOffset = ref(0); // Position des Bildes relativ zum Dokument
-const opacity = ref(1); // Transparenz des Bildes
 
-// Animationseinstellungen
 const maxZoom = 5; // Maximales Zoom-Limit
 const initialScale = 0.5; // Ausgangsgröße des Bildes
 
-// Bild-Element referenzieren
-const imageElement = ref(null);
-
-// Viewport-Höhe und Bildinformationen erfassen
+// Viewport-Höhe und Bildinformationen abrufen, sobald die Komponente gemountet ist
 onMounted(() => {
   viewportHeight.value = window.innerHeight;
 
-  const img = imageElement.value?.querySelector("img");
-  if (img) {
-    const rect = img.getBoundingClientRect();
+  const imageElement = document.querySelector(".absolute img");
+  if (imageElement) {
+    const rect = imageElement.getBoundingClientRect();
     imageHeight.value = rect.height;
     imageTopOffset.value = rect.top + window.scrollY;
   }
-
-  // Animation starten
-  requestAnimationFrame(updateAnimation);
 });
 
 // Offsets für den Animationsbereich berechnen
@@ -74,37 +58,39 @@ const startAnimationOffset = computed(() => {
 });
 
 const endAnimationOffset = computed(() => {
-  return startAnimationOffset.value + viewportHeight.value * 4;
+  return startAnimationOffset.value + viewportHeight.value * 4; // Animation endet nach 4 Viewport-Höhen
 });
 
-// Animation aktualisieren
-function updateAnimation() {
+// Transformationen und Effekte basierend auf Scroll-Position berechnen
+const translateY = computed(() => {
+  const offsetY = y.value - startAnimationOffset.value;
+  return offsetY > 0 ? offsetY : 0;
+});
+
+const scale = computed(() => {
   const offsetY = y.value - startAnimationOffset.value;
 
-  // Skalierung berechnen
-  const progress = Math.min(Math.max(offsetY / (viewportHeight.value * 4), 0), 1);
-  const easedProgress = easeInOutCubic(progress);
-  const scale = initialScale + easedProgress * (maxZoom - initialScale);
+  // Stärkerer Zoom am Anfang, langsamer werdend
+  const zoomFactor = viewportHeight.value * 2;
+  const computedScale = offsetY > 0 ? initialScale + Math.pow(offsetY / zoomFactor, 0.8) : initialScale;
 
-  // Transparenz berechnen
-  opacity.value = 1 - progress;
+  // Maximaler Zoom, abhängig von der Bildschirmgröße
+  const maxZoom = Math.min(5, viewportHeight.value / 100); // Beispiel: Maximaler Zoom von 5 oder 5% der Viewport-Höhe
 
-  // Transform anwenden
-  if (imageElement.value) {
-    const img = imageElement.value.querySelector("img");
-    if (img) {
-      img.style.transform = `scale(${scale})`;
-    }
-  }
+  return Math.min(computedScale, maxZoom);
+});
 
-  // Nächsten Frame anfordern
-  requestAnimationFrame(updateAnimation);
-}
+const opacity = computed(() => {
+  const offsetY = y.value - startAnimationOffset.value;
+  if (offsetY <= 0) return 1; // Voll sichtbar vor der Animation
+  if (offsetY >= viewportHeight.value * 4) return 0; // Unsichtbar nach dem Scrollen
+  return 1; // Ausblenden
+});
 </script>
 
 <style scoped>
 /* Übergänge für das Bild */
 .absolute img {
-  transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.5, 1), opacity 0.2s ease;
+  transition: transform 0.1s ease, opacity 0.1s ease;
 }
 </style>

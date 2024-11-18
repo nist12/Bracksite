@@ -1,5 +1,5 @@
 <template>
-    <section id="startseite" class="py-16 flex flex-col lg:flex-row items-center justify-between text-center lg:text-left">
+    <section id="startseite" class="relative py-16 flex flex-col lg:flex-row items-center justify-between text-center lg:text-left">
       <div class="lg:w-1/2">
         <h1 class="text-4xl font-bold mb-6">Willkommen bei <span class="text-greenbr">Brackets</span></h1>
         <p class="text-lg leading-relaxed p-4 lg:p-0 max-w-2xl mx-auto lg:mx-0">
