@@ -39,11 +39,11 @@ import { ref, onMounted } from 'vue';
 
 // Begriffe
 const words = ['Kreativität,', 'Innovation,', 'Klarheit,'];
-const currentWord = ref(''); // Aktuelles Wort
+const currentWord = ref(words[0]); // Erstes Wort direkt setzen
 
-// Initialisierung
 onMounted(() => {
-  let currentIndex = 0;
+  let currentIndex = 1; // Der nächste Index (das zweite Wort)
+  
   const cycleWords = () => {
     currentWord.value = ''; // Wort zurücksetzen, um "Verschwinden"-Effekt zu erzeugen
     setTimeout(() => {
@@ -51,10 +51,12 @@ onMounted(() => {
       currentIndex = (currentIndex + 1) % words.length; // Zyklisch durch Wörter wechseln
     }, 500); // Verzögerung vor dem Einblenden
   };
-  cycleWords(); // Initiales Wort setzen
+
+  // Starte den Zyklus nach dem initialen Wort
   setInterval(cycleWords, 3000); // Alle 3 Sekunden aktualisieren
 });
 </script>
+
 
 
 <style>
@@ -82,7 +84,7 @@ onMounted(() => {
 
 .letter-animation {
   display: inline-block;
-  animation: reveal 0.5s ease-out forwards;
+  animation: reveal 0.2s ease-out forwards;
   opacity: 0; /* Anfangszustand unsichtbar */
 }
 </style>
