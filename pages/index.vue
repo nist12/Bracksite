@@ -4,7 +4,7 @@
 
       <StartSpuch />
 
-      <StartScreen />
+      <!---<StartScreen />-->
 
       <HeroSection />
 
